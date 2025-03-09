@@ -10,11 +10,11 @@ import com.fintracker.storage.UserStorage;
 
 public class Main {
     public static void main(String[] args) {
-        // Создаем хранилища
+
         UserStorage userStorage = new UserStorage();
         TransactionStorage transactionStorage = new TransactionStorage();
 
-        // Создаем сервисы
+
         NotificationService notificationService = new NotificationService();
         UserService userService = new UserService(userStorage);
         BudgetService budgetService = new BudgetService(notificationService);
@@ -22,14 +22,14 @@ public class Main {
         AnalyticsService analyticsService = new AnalyticsService(transactionStorage);
         TransactionService transactionService = new TransactionService(transactionStorage, budgetService, goalService);
 
-        // Создаем админа по умолчанию
+
         userService.register(new User("Admin", "admin@fintracker.com", "admin123", UserRole.ADMIN));
 
-        // Создаем консольные обработчики
+
         UserConsoleHandler userConsoleHandler = new UserConsoleHandler(userService,transactionService);
         TransactionConsoleHandler transactionConsoleHandler = new TransactionConsoleHandler(transactionService, budgetService, goalService, analyticsService, notificationService);
 
-        // Запускаем программу
+
         System.out.println("Добро пожаловать в финансовый трекер!");
         userConsoleHandler.start();
         transactionConsoleHandler.start();
