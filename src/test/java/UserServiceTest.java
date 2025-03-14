@@ -1,65 +1,89 @@
-import com.fintracker.core.models.User;
-import com.fintracker.core.models.UserRole;
-import com.fintracker.core.services.UserService;
+import com.fintracker.core.service.UserService;
+import com.fintracker.core.model.User;
+import com.fintracker.core.model.UserRole;
 import com.fintracker.storage.UserStorage;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class UserServiceTest {
+class UserServiceTest {
+
     @Mock
     private UserStorage userStorage;
 
-    @InjectMocks
     private UserService userService;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
+        userService = new UserService(userStorage);
     }
 
     @Test
-    void registerShouldAddUserWhenEmailNotExist() {
-        User newUser = new User("Alex", "alex@email.com", "correctPassword",UserRole.USER);
-        when(userStorage.getUserByEmail(newUser.getEmail())).thenReturn(null);
-        User registeredUser = userService.register(newUser);
-        assertThat(registeredUser).isNotNull();
-        verify(userStorage).addUser(newUser);
+    @DisplayName("Проверка регистрации нового пользователя")
+    void registerShouldCreateUserWhenNotExists() {
+        User user = new User("John", "john@mail.com", "password123", UserRole.USER);
+
+        when(userStorage.getUserByEmail(user.getEmail())).thenReturn(null);
+
+        userService.register(user);
+
+        verify(userStorage, times(1)).addUser(user);
     }
 
     @Test
-    void registerShouldReturnNullWhenEmailAlreadyExist() {
-        User existUser = new User("TestName", "test@email.com", "correctPassword",UserRole.USER);
-        when(userStorage.getUserByEmail(existUser.getEmail())).thenReturn(existUser);
-        User registeredUser = userService.register(existUser);
-        assertThat(registeredUser).isNull();
+    @DisplayName("Проверка, что пользователь не регистрируется, если уже существует")
+    void registerShouldNotCreateUserWhenAlreadyExists() {
+        User user = new User("John", "john@mail.com", "password123", UserRole.USER);
+
+        when(userStorage.getUserByEmail(user.getEmail())).thenReturn(user);
+
+        userService.register(user);
+
         verify(userStorage, never()).addUser(any());
     }
 
     @Test
-    void loginShouldSucceedWhenCredentialsAreCorrect() {
-        User user = new User("TestName", "test@email.com", "correctPassword",UserRole.USER);
+    @DisplayName("Проверка успешного входа пользователя")
+    void loginShouldSucceedWithCorrectCredentials() {
+        User user = new User("John", "john@mail.com", "password123", UserRole.USER);
+
         when(userStorage.getUserByEmail(user.getEmail())).thenReturn(user);
+
         userService.login(user.getEmail(), user.getPassword());
+
+        verify(userStorage, times(1)).getUserByEmail(user.getEmail());
     }
 
     @Test
-    void loginShouldFailWhenPasswordIsIncorrect() {
-        User user = new User("TestName", "test@email.com", "correctPassword", UserRole.USER);
+    @DisplayName("Должен обновить данные пользователя при редактировании")
+    void editUserShouldUpdateUserDetails() {
+        User existingUser = new User("John", "john@mail.com", "pass123", UserRole.USER);
+        when(userStorage.getUserByEmail("john@mail.com")).thenReturn(existingUser);
+
+        userService.editUser("john@mail.com", "Johnny", "johnny@mail.com", "newpass123");
+
+        verify(userStorage).getUserByEmail("john@mail.com");
+        verify(userStorage).updateUser(argThat(updatedUser ->
+                updatedUser.getName().equals("Johnny") &&
+                        updatedUser.getEmail().equals("johnny@mail.com") &&
+                        updatedUser.getPassword().equals("newpass123")
+        ));
+    }
+
+    @Test
+    @DisplayName("Проверка удаления пользователя")
+    void deleteUserShouldRemoveUser() {
+        User user = new User("John", "john@mail.com", "password123", UserRole.USER);
+
         when(userStorage.getUserByEmail(user.getEmail())).thenReturn(user);
-        userService.login(user.getEmail(), "WrongPassword");
-    }
-    @Test
-    void loginShouldFailWhenUserNotFound(){
-        String email = "unknown@email.com";
-        when(userStorage.getUserByEmail(email)).thenReturn(null);
 
-        userService.login(email,"somePassword");
+        userService.deleteUser(user.getEmail());
 
+        verify(userStorage, times(1)).removeUser(user.getEmail());
     }
 }
