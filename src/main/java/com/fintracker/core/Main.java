@@ -5,11 +5,12 @@ import com.fintracker.core.model.UserRole;
 import com.fintracker.in.TransactionConsoleHandler;
 import com.fintracker.in.UserConsoleHandler;
 
+import java.sql.*;
 
 
 public class Main {
-    public static void main(String[] args) {
 
+    public static void main(String[] args) {
          var userService = AppFactory.getUserService();
 
 
