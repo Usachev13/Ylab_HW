@@ -1,0 +1,17 @@
+<databaseChangeLog>
+    <changeSet id="2" author="developer">
+        <insert schemaName="finances" tableName="users">
+            <column name="name" value="Admin"/>
+            <column name="email" value="admin@fintracker.com"/>
+            <column name="password" value="adminpass"/>
+        </insert>
+        <insert schemaName="finances" tableName="transactions">
+            <column name="user_id" value="1"/>
+            <column name="amount" value="1500.00"/>
+            <column name="category" value="Salary"/>
+            <column name="date" value="2025-03-15"/>
+            <column name="description" value="Monthly salary"/>
+            <column name="type" value="INCOME"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

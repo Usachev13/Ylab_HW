@@ -10,12 +10,16 @@ ext {
     junitVersion = "5.9.1"
     mockitoVersion = "3.12.4"
     assertjVersion = "3.6.1"
+    postgresVersion = '42.7.2'
+    liquibaseVersion = "4.19.0"
 }
 dependencies {
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation "org.mockito:mockito-core:${mockitoVersion}"
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    implementation "org.postgresql:postgresql:${postgresVersion}"
+    implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
 }
 test {
     useJUnitPlatform()
